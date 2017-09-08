@@ -8,18 +8,25 @@
   <title>Document</title>
 </head>
 <body>
-  <label for="col">行</label><input type="number" name="col" id="col">
-  <label for="row">列</label><input type="number" name="row" id="row">
+  <label for="col">行</label><input type="number" name="col" id="col" value="100">
+  <label for="row">列</label><input type="number" name="row" id="row" value="100">
   <button id="generate">生成</button>
   <button id="next">下一回合</button>
   <button id="run">跑起来</button>
   <button id="stop">暂停</button>
+  <br>
+  <p><span>当前局数:</span><span id="current"></span></p>
+  <p><span>计算状态时间:</span><span id="cal_time"></span></p>
+  <p><span>绘制时间:</span><span id="draw_time"></span></p>
   <canvas width="700" height="700" id="canvas"></canvas>
 
   <script>
   
     var es = e => document.querySelector(e)
 
+    let drawTime = es('#draw_time')
+    let calTime = es('#cal_time')
+    let current = es('#current')
     let col = es('#col')
     let row = es('#row')
     let generate = es('#generate')
@@ -34,25 +41,36 @@
     let h = canvas.height
     let fps = 1000
     let stopLoop = true
+    let currentRounds = 0
 
+    let draw = () => {
+      cell.draw(time => drawTime.innerText = time)
+    }
+
+    let nextRound = () => {
+      cell.nextRound(time => calTime.innerText = time)
+      currentRounds++
+      current.innerText = currentRounds
+    }
 
     generate.onclick = () => {
       ctx.clearRect(0, 0, w, h)
-      cell = new Cell(col.value, row.value, ctx, w, h)
-      cell.draw()
+      cell = new CellGonup(col.value, row.value, ctx, w, h)
+      currentRounds = 1
+      draw()
     }
 
     next.onclick = () => {
-      cell.nextRound()
-      cell.draw()      
+      nextRound()
+      draw()
     }
 
     run.onclick = () => {
       stopLoop = false
       let loop = () => {
         setTimeout(() => {
-          cell.nextRound()
-          cell.draw()          
+          nextRound()
+          draw()          
           stopLoop || loop()
         }, fps)
       }
@@ -62,6 +80,8 @@
     stop.onclick = () => {
       stopLoop = true
     }
+
+
 
 
   </script>

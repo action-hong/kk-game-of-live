@@ -1,8 +1,18 @@
 const random = () => Math.random() > 0.5 ? 1 : 0
 const style = ['gray', 'red']
+const calFuncTime = function (func, callback) {
+  let time = new Date().getTime()
+  func()
+  let costTime = new Date().getTime() - time
+  console.log(func.name, costTime)
+  callback(costTime)
+}
+
 class Cell {
-  constructor(ctx, state) {
+  constructor(ctx, state, row, col) {
     this.state = state
+    this.row = row
+    this.col = col
     this.preState = null
   }
 
@@ -15,13 +25,13 @@ class Cell {
     this.state = state
   }
 
-  drawCell(row, col, w, h) {
+  drawCell(w, h) {
     // 优化绘制
     if (this.state === this.preState) {
       return
     }
     this.ctx.fillStyle = style[this.state]
-    this.ctx.fillRect(i*w, j*h, w - 1, h - 1)
+    this.ctx.fillRect(this.row * w, this.col * h, w - 1, h - 1)
   }
 }
 
@@ -29,10 +39,10 @@ class CellGonup {
   constructor(row, col, ctx, w, h) {
     this.row = row
     this.col = col
-    this.cells= []
-    for (let i = 0; i < row ; i++) {
+    this.cells = []
+    for (let i = 0; i < row; i++) {
       let cs = []
-      for (let j = 0 ; j < col ; j++) {
+      for (let j = 0; j < col; j++) {
         cs.push(random())
       }
       this.cells.push(cs)
@@ -46,11 +56,23 @@ class CellGonup {
     this.style = ['gray', 'red']
   }
 
-  nextRound() {
+  nextRound(callback) {
+    calFuncTime(() => {
+      this._nextRound()
+    }, callback)
+  }
+
+  draw(callback) {
+    calFuncTime(() => {
+      this._draw()
+    }, callback)
+  }
+
+  _nextRound() {
     let nextCells = []
-    for (let i = 0; i < this.row ; i++) {
+    for (let i = 0; i < this.row; i++) {
       let cs = []
-      for (let j = 0 ; j < this.col ; j++) {
+      for (let j = 0; j < this.col; j++) {
         cs.push(this.nextState(i, j))
       }
       nextCells.push(cs)
@@ -88,31 +110,31 @@ class CellGonup {
     let nr = this.cells[i + 1]
     let cr = this.cells[i]
     if (pr) {
-      pr[j-1] && count++
+      pr[j - 1] && count++
       pr[j] && count++
-      pr[j+1] && count++
+      pr[j + 1] && count++
     }
 
     if (nr) {
-      nr[j-1] && count++
+      nr[j - 1] && count++
       nr[j] && count++
-      nr[j+1] && count++
+      nr[j + 1] && count++
     }
 
-    cr[j-1] && count++
-    cr[j+1] && count++
+    cr[j - 1] && count++
+    cr[j + 1] && count++
 
     return count
   }
 
-  draw() {
-    ctx.clearRect(0,0,this.canvasW, this.canvasH)
+  _draw() {
+    ctx.clearRect(0, 0, this.canvasW, this.canvasH)
     let w = this.w
     let h = this.h
-    for (let i = 0; i < this.row ; i++) {
-      for (let j = 0 ; j < this.col ; j++) {
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.col; j++) {
         this.ctx.fillStyle = this.style[this.cells[i][j]]
-        this.ctx.fillRect(i*w, j*h, w - 1, h - 1)
+        this.ctx.fillRect(i * w, j * h, w - 1, h - 1)
       }
     }
   }
