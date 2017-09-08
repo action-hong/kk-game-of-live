@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="./cell.js"></script>
+  <title>Document</title>
+</head>
+<body>
+  <label for="col">行</label><input type="number" name="col" id="col">
+  <label for="row">列</label><input type="number" name="row" id="row">
+  <button id="generate">生成</button>
+  <button id="next">下一回合</button>
+  <button id="run">跑起来</button>
+  <button id="stop">暂停</button>
+  <canvas width="700" height="700" id="canvas"></canvas>
+
+  <script>
+  
+    var es = e => document.querySelector(e)
+
+    let col = es('#col')
+    let row = es('#row')
+    let generate = es('#generate')
+    let next = es('#next')
+    let stop = es('#stop')
+    let run = es('#run')
+    let canvas = es('#canvas')
+    let ctx = canvas.getContext('2d')
+    let cell = null
+
+    let w = canvas.width
+    let h = canvas.height
+    let fps = 1000
+    let stopLoop = true
+
+
+    generate.onclick = () => {
+      ctx.clearRect(0, 0, w, h)
+      cell = new Cell(col.value, row.value, ctx, w, h)
+      cell.draw()
+    }
+
+    next.onclick = () => {
+      cell.nextRound()
+      cell.draw()      
+    }
+
+    run.onclick = () => {
+      stopLoop = false
+      let loop = () => {
+        setTimeout(() => {
+          cell.nextRound()
+          cell.draw()          
+          stopLoop || loop()
+        }, fps)
+      }
+      loop()
+    }
+
+    stop.onclick = () => {
+      stopLoop = true
+    }
+
+
+  </script>
+</body>
+</html>
