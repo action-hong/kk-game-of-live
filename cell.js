@@ -8,15 +8,15 @@ const calFuncTime = function (func, callback) {
 }
 
 class Cell {
-  constructor(ctx, state, row, col) {
+  constructor(cells, ctx, state) {
+    this.ctx = ctx
+    this.cells = cells
     this.state = state
-    this.row = row
-    this.col = col
     this.preState = null
   }
 
   changeState(state) {
-    if (state != 1 || state != 0) {
+    if (state !== 1 && state !== 0) {
       throw new Exception()
     }
     // 记录上一个状态, 优化绘制, 相同的话就不需要绘制了
@@ -24,13 +24,14 @@ class Cell {
     this.state = state
   }
 
-  drawCell(w, h) {
+  draw(row, col, w, h) {
     // 优化绘制
     if (this.state === this.preState) {
       return
     }
+    this.cells.preRoundDraw++
     this.ctx.fillStyle = style[this.state]
-    this.ctx.fillRect(this.row * w, this.col * h, w - 1, h - 1)
+    this.ctx.fillRect(row * w, col * h, w - 1, h - 1)
   }
 }
 
@@ -42,7 +43,8 @@ class CellGonup {
     for (let i = 0; i < row; i++) {
       let cs = []
       for (let j = 0; j < col; j++) {
-        cs.push(random())
+        // cs.push(random())
+        cs.push(new Cell(this, ctx, random()))
       }
       this.cells.push(cs)
     }
@@ -53,6 +55,8 @@ class CellGonup {
     this.w = w / col
     this.h = h / row
     this.style = ['gray', 'red']
+    // 每一回合, 需要绘制几个
+    this.preRoundDraw = 0
   }
 
   nextRound(callback) {
@@ -76,7 +80,11 @@ class CellGonup {
       }
       nextCells.push(cs)
     }
-    this.cells = nextCells
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.col; j++) {
+        this.cells[i][j].changeState(nextCells[i][j])
+      }
+    }
   }
 
   /**
@@ -89,7 +97,7 @@ class CellGonup {
   nextState(i, j) {
     let count = this.aroundLiveCells(i, j)
     // console.log(i, j, count)
-    let state = this.cells[i][j]
+    let state = this.cells[i][j].state
     if (state) {
       if (count == 2 || count == 3) {
         return 1
@@ -109,32 +117,37 @@ class CellGonup {
     let nr = this.cells[i + 1]
     let cr = this.cells[i]
     if (pr) {
-      pr[j - 1] && count++
-      pr[j] && count++
-      pr[j + 1] && count++
+      pr[j - 1] && pr[j - 1].state && count++
+      pr[j].state && count++
+      pr[j + 1] && pr[j + 1].state && count++
     }
 
     if (nr) {
-      nr[j - 1] && count++
-      nr[j] && count++
-      nr[j + 1] && count++
+      nr[j - 1] && nr[j - 1].state && count++
+      nr[j].state && count++
+      nr[j + 1] && nr[j + 1].state && count++
     }
 
-    cr[j - 1] && count++
-    cr[j + 1] && count++
+    cr[j - 1] && cr[j - 1].state && count++
+    cr[j + 1] && cr[j + 1].state && count++
 
     return count
   }
 
   _draw() {
-    ctx.clearRect(0, 0, this.canvasW, this.canvasH)
+    // ctx.clearRect(0, 0, this.canvasW, this.canvasH)
     let w = this.w
     let h = this.h
     for (let i = 0; i < this.row; i++) {
       for (let j = 0; j < this.col; j++) {
-        this.ctx.fillStyle = this.style[this.cells[i][j]]
-        this.ctx.fillRect(i * w, j * h, w - 1, h - 1)
+        let cell = this.cells[i][j]
+        this.ctx.fillStyle = this.style[cell.state]
+        // this.ctx.fillRect(i * w, j * h, w - 1, h - 1)
+        // 记录上一个状态, 绘制时间剪了差不多一半
+        cell.draw(i, j, w, h)
       }
     }
+    console.log(this.preRoundDraw)
+    this.preRoundDraw = 0
   }
 }
