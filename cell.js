@@ -1,10 +1,9 @@
-const random = () => Math.random() > 0.5 ? 1 : 0
+const random = () => Math.random() * 100 < config.threshold ? 1 : 0
 const style = ['gray', 'red']
 const calFuncTime = function (func, callback) {
   let time = new Date().getTime()
   func()
   let costTime = new Date().getTime() - time
-  console.log(func.name, costTime)
   callback(costTime)
 }
 
