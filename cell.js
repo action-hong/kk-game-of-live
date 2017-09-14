@@ -25,6 +25,7 @@ class Cell {
   }
 
   draw(row, col, w, h) {
+    this.cells.liveCell += this.state
     // 优化绘制
     if (this.state === this.preState) {
       return
@@ -57,6 +58,8 @@ class CellGonup {
     this.style = ['gray', 'red']
     // 每一回合, 需要绘制几个
     this.preRoundDraw = 0
+    // 该回合活着的细胞
+    this.liveCell = 0
   }
 
   nextRound(callback) {
@@ -66,6 +69,7 @@ class CellGonup {
   }
 
   draw(callback) {
+    this.liveCell = 0
     calFuncTime(() => {
       this._draw()
     }, callback)

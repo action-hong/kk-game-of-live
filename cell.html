@@ -18,6 +18,7 @@
   <button id="stop">暂停</button>
   <br>
   <p><span>当前局数:</span><span id="current"></span></p>
+  <p><span>当前存活的细胞:</span><span id="live_cells"></span></p>
   <p><span>计算状态时间:</span><span id="cal_time"></span></p>
   <p><span>绘制时间:</span><span id="draw_time"></span></p>
   <div id="set_config"></div>
@@ -30,6 +31,7 @@
     let drawTime = es('#draw_time')
     let calTime = es('#cal_time')
     let current = es('#current')
+    let liveCells = es('#live_cells')
     let col = es('#col')
     let row = es('#row')
     let generate = es('#generate')
@@ -48,6 +50,7 @@
 
     let draw = () => {
       cell.draw(time => drawTime.innerText = time)
+      liveCells.innerText = cell.liveCell
     }
 
     let nextRound = () => {
@@ -60,6 +63,7 @@
       ctx.clearRect(0, 0, w, h)
       cell = new CellGonup(col.value, row.value, ctx, w, h)
       currentRounds = 1
+      current.innerText = currentRounds
       draw()
     }
 
@@ -73,7 +77,7 @@
       let loop = () => {
         setTimeout(() => {
           nextRound()
-          draw()          
+          draw()
           stopLoop || loop()
         }, config.fps)
       }
