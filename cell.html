@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,15 @@
   <script src="./config.js"></script>
   <script src="./cell.js"></script>
   <script src="./utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.7.1/echarts.min.js"></script>
   <title>Document</title>
+  <style>
+    #main {
+      float: right;
+    }
+  </style>
 </head>
+
 <body>
   <label for="col">行</label><input type="number" name="col" id="col" value="100">
   <label for="row">列</label><input type="number" name="row" id="row" value="100">
@@ -24,8 +32,34 @@
   <div id="set_config"></div>
   <canvas width="700" height="700" id="canvas"></canvas>
 
+  <div id="main" style="width: 800px;height:400px;"></div>
+
   <script>
-  
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    var option = {
+      title: {
+        text: '生活游戏活细胞变化'
+      },
+      tooltip: {},
+      legend: {
+        data: ['活细胞个数']
+      },
+      xAxis: {
+        data: []
+      },
+      yAxis: {},
+      series: [{
+        name: '个数',
+        type: 'line',
+        data: []
+      }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
     var es = e => document.querySelector(e)
 
     let drawTime = es('#draw_time')
@@ -51,6 +85,9 @@
     let draw = () => {
       cell.draw(time => drawTime.innerText = time)
       liveCells.innerText = cell.liveCell
+      option.xAxis.data.push(currentRounds)
+      option.series[0].data.push(cell.liveCell)
+      myChart.setOption(option);
     }
 
     let nextRound = () => {
@@ -90,9 +127,7 @@
 
     debug(true)
 
-
-
-
   </script>
 </body>
+
 </html>
